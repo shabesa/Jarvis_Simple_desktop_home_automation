@@ -8,7 +8,7 @@ import wikipedia
 import webbrowser
 from time import sleep
 
-music_dir = 'your directory'
+music_dir = 'C:\\Users\\DELL\\Desktop\\shabesa\\Musiq\\Bigil-320kbps-MassTamilan.org'
 
 
 engine = pyttsx3.init('sapi5')
@@ -61,7 +61,21 @@ def sendEmail(to, content):
     server.close()
 
 
+def byebye():
+    hour = int(datetime.datetime.now().hour)
+    if hour >= 0 and hour < 12:
+        talk('happy day sir')
+    elif hour >= 12 and hour < 16:
+        talk('happy noon sir')
+    elif hour >= 16 and hour < 20:
+        talk('happy evening sir')
+    else:
+        talk('good night sir')
+    talk('bye bye sir')
+
+
 if __name__ == "__main__":
+    talk('Hi I am Jarvis. Your personal assistant')
     welcome()
     while True:
         query = inputVC().lower()
@@ -73,23 +87,35 @@ if __name__ == "__main__":
             talk('sir song number please')
             songVal = inputVC()
             os.startfile(os.path.join(music_dir, songs[int(songVal)]))
-        
         elif 'wait' in query:
             talk('sir duration')
             waitVal = inputVC()
             sleep(int(waitVal))
-        
         elif 'send a mail' in query:
             try:
                 talk("What should I say?")
                 content = inputVC()
-                to = "to mail id"
+                talk("sir please enter the mail id")
+                to = input()
                 sendEmail(to, content)
                 talk("Email has been sent!")
             except Exception as e:
                 print(e)
                 talk("Sorry sir. I am not able to send this email")
-
+        elif 'what is the time' in query:
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")
+            talk(f"Sir, the time is {strTime}")
+        elif 'jarvis are you here' in query:
+            talk('At your service sir')
+        elif 'turn on light' in query:
+            talk('Sir which room?')
+            room = inputVC()
+            if room == 'master bedroom':
+                talk(f'turning on lights in {room}')
+        elif 'surf' or 'browse' in query:
+            webbrowser.open('google.co.in')       
+        elif 'thank you' in query:
+            talk('my pleasure sir')
         elif 'bye bye' in query:
-            talk('happy to help you sir')
+            byebye()
             break
