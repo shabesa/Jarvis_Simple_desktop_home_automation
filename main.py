@@ -6,9 +6,13 @@ import paho.mqtt as mqtt
 import smtplib
 import wikipedia
 import webbrowser
+from time import sleep
+
+music_dir = 'your directory'
+
 
 engine = pyttsx3.init('sapi5')
-voice = engine.getProperty('voices')
+voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 
 
@@ -55,3 +59,37 @@ def sendEmail(to, content):
     server.login('your email id', 'password')
     server.sendmail('your email id', to, content)
     server.close()
+
+
+if __name__ == "__main__":
+    welcome()
+    while True:
+        query = inputVC().lower()
+
+        if 'play music' in query:
+            songs = os.listdir(music_dir)
+            print(songs)
+            sleep(5)
+            talk('sir song number please')
+            songVal = inputVC()
+            os.startfile(os.path.join(music_dir, songs[int(songVal)]))
+        
+        elif 'wait' in query:
+            talk('sir duration')
+            waitVal = inputVC()
+            sleep(int(waitVal))
+        
+        elif 'send a mail' in query:
+            try:
+                talk("What should I say?")
+                content = inputVC()
+                to = "to mail id"
+                sendEmail(to, content)
+                talk("Email has been sent!")
+            except Exception as e:
+                print(e)
+                talk("Sorry sir. I am not able to send this email")
+
+        elif 'bye bye' in query:
+            talk('happy to help you sir')
+            break
