@@ -95,7 +95,7 @@ if __name__ == "__main__":
     talk('Hi I am Jarvis. Your personal assistant')
     welcome()
     while True:
-        query = inputVC().lower() 
+        query = inputVC().lower()
 
         if 'drop my needle' or 'play music' in query:
             songs = os.listdir(music_dir)
