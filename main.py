@@ -1,3 +1,4 @@
+# importing the necessary modules
 import pyttsx3
 import speech_recognition as sr
 import datetime
@@ -9,25 +10,31 @@ import webbrowser
 from time import sleep
 import vlc
 
+# setting the state for media
 songIsPlaying = False
 videoIsPlaying = False
 
+# adding media directories
 # example_dir = 'C:\\Users\\DELL\\Desktop\\'
 movie_dir = 'add your movie directory'
 music_dir = 'add you song directory'
 
+# init the vlc player
 media_player = vlc.MediaPlayer()
 
+# init the text to speech engine
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 
 
+# making to speak the text
 def talk(audio):
     engine.say(audio)
     engine.runAndWait()
 
 
+# welcome when running program
 def welcome():
     hour = int(datetime.datetime.now().hour)
     if hour >= 0 and hour < 12:
@@ -39,6 +46,7 @@ def welcome():
     talk("Welcome Sir. How may I help you")
 
 
+# function to get voice input and recognizing
 def inputVC():
 
     r = sr.Recognizer()
@@ -59,6 +67,7 @@ def inputVC():
     return query
 
 
+# function to start server to send mail
 def sendEmail(to, content):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.ehlo()
@@ -68,6 +77,7 @@ def sendEmail(to, content):
     server.close()
 
 
+# function to stop the function
 def byebye():
     hour = int(datetime.datetime.now().hour)
     if hour >= 0 and hour < 12:
@@ -85,7 +95,7 @@ if __name__ == "__main__":
     talk('Hi I am Jarvis. Your personal assistant')
     welcome()
     while True:
-        query = inputVC().lower()
+        query = inputVC().lower() 
 
         if 'drop my needle' or 'play music' in query:
             songs = os.listdir(music_dir)
