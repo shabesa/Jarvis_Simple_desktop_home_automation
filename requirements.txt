@@ -1,0 +1,22 @@
+# Jarvis Home Automation
+
+Requirements:
+
+1. Python text to speech
+        pip install pyttsx3
+2. Speech Recognition
+        pip install SpeechRecognition
+3. Mqtt
+	    pip install paho-mqtt
+4. Wikipedia
+        pip install wikipedia
+5. VLC media control
+        pip install python-vlc
+
+pre-installed Requirements:
+
+1. datetime
+2. os
+3. smtplib
+4. webbrowser
+5. time --> sleep
