@@ -14,10 +14,11 @@ import vlc
 songIsPlaying = False
 videoIsPlaying = False
 
+
 # adding media directories
 # example_dir = 'C:\\Users\\DELL\\Desktop\\'
 movie_dir = 'add your movie directory'
-music_dir = 'add you song directory'
+music_dir = 'add your song directory'
 
 # init the vlc player
 media_player = vlc.MediaPlayer()
@@ -97,9 +98,12 @@ if __name__ == "__main__":
     while True:
         query = inputVC().lower()
 
-        if 'drop my needle' or 'play music' in query:
-            songs = os.listdir(music_dir)
-            print(songs)
+        if 'play music' in query:
+            songs = list(os.listdir(music_dir))
+            n = 0
+            for i in songs:
+                print(n, '.', i)
+                n += 1
             sleep(5)
             talk('sir song number please')
             songVal = inputVC()
@@ -182,7 +186,12 @@ if __name__ == "__main__":
         elif 'wait' in query:
             talk('sir duration')
             waitVal = inputVC()
-            sleep(int(waitVal))
+            if waitVal == 'media time' or waitVal == 'time':
+                dur = media_player.get_length()
+                print((dur / 1000) / 60)
+                sleep(dur / 1000)
+            else:
+                sleep(int(waitVal))
 
         elif 'send a mail' in query:
             try:
