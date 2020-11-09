@@ -3,7 +3,9 @@ import pyttsx3
 import speech_recognition as sr
 import datetime
 import os
-import paho.mqtt as mqtt
+import paho.mqtt.publish as publish
+import paho.mqtt.subscribe as subscribe
+import serial
 import smtplib
 import wikipedia
 import webbrowser
@@ -14,19 +16,25 @@ import vlc
 songIsPlaying = False
 videoIsPlaying = False
 
-
 # adding media directories
 # example_dir = 'C:\\Users\\DELL\\Desktop\\'
 movie_dir = 'add your movie directory'
-music_dir = 'add your song directory'
+music_dir = 'add your music directory'
 
 # init the vlc player
 media_player = vlc.MediaPlayer()
+
+# mqtt host
+host = "enter your host"
+mqtt_alive = False
 
 # init the text to speech engine
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
+
+# setting serial comms
+# board = serial.Serial(COM6, 9600)
 
 
 # making to speak the text
@@ -44,7 +52,7 @@ def welcome():
         talk("Good Afternoon!")
     elif hour >= 16 and hour < 19:
         talk("Good Evening!")
-    talk("Welcome Sir. How may I help you")
+    talk("Welcome Sir.")
 
 
 # function to get voice input and recognizing
@@ -89,12 +97,52 @@ def byebye():
         talk('happy evening sir')
     else:
         talk('good night sir')
-    talk('bye bye sir')
+    talk('see you later sir')
+
+
+def mqtt_ping():
+    talk("checking mqtt server")
+    try:
+        publish.single("ping", payload="mqtt", hostname=host)
+        test = subscribe.simple("pingOut", hostname=host)
+        print('%s' % (test.payload))
+        if test.payload.decode('ascii') == "mqtt":
+            talk("mqtt server up and running")
+            mqtt_alive = True
+    except Exception as e:
+        print(e)
+        talk("sir mqtt server is not responding")
+        mqtt_alive = False
+
+
+def systemCheck():
+    if mqtt_alive is True:
+        talk("sir i am initiating systems check")
+        publish.single("check", payload="check", hostname=host)
+        system1 = subscribe.simple("status", hostname=host)
+        print('%s' % (system1.payload.decode('ascii')))
+        if system1.payload.decode('ascii') == "board 1 online":
+            talk("sir board 1 is online")
+        else:
+            talk("sir the systems are offline")
+    elif mqtt_alive is False:
+        talk("system check failed as the mqtt server is down")
+
+
+def room_temp():
+    if mqtt_alive is True:
+        talk("fetching room temperature data")
+        publish.single("temp", payload="temp", hostname=host)
+        temperature = subscribe.simple("tdata", hostname=host)
+        print("%s" % (temperature.payload.decode('ascii')))
+        talk(temperature.payload.decode('ascii') + "degree celcius")
 
 
 if __name__ == "__main__":
     talk('Hi I am Jarvis. Your personal assistant')
     welcome()
+    mqtt_ping()
+    systemCheck()
     while True:
         query = inputVC().lower()
 
@@ -209,14 +257,40 @@ if __name__ == "__main__":
             strTime = datetime.datetime.now().strftime("%H:%M:%S")
             talk(f"Sir, the time is {strTime}")
 
+        elif 'what is the room temperature' in query:
+            room_temp()
+
         elif 'jarvis' in query:
             talk('At your service sir')
 
-        elif 'turn on light' in query:
-            talk('Sir which room?')
-            room = inputVC()
-            if room == 'master bedroom':
-                talk(f'turning on lights in {room}')
+        elif 'initiate systems check' in query:
+            systemCheck()
+
+        elif 'turn on lights' in query:
+            if mqtt_alive is True:
+                talk('Sir which room?')
+                room = inputVC()
+                if room == 'master bedroom':
+                    talk(f'turning on lights in {room}')
+                    publish.single("lightsOut", payload="mblon", hostname=host)
+                elif room == 'server room':
+                    talk(f'turning on lights in {room}')
+                    publish.single("lightsOut", payload="srlon", hostname=host)
+            elif mqtt_alive is False:
+                talk("sorry sir mqtt server is down")
+
+        elif 'turn off lights' in query:
+            if mqtt_alive is True:
+                talk('Sir which room?')
+                room = inputVC()
+                if room == 'master bedroom':
+                    talk(f'turning off lights in {room}')
+                    publish.single("lightsOut", payload="mblof", hostname=host)
+                elif room == 'server room':
+                    talk(f'turning off lights in {room}')
+                    publish.single("lightsOut", payload="srlof", hostname=host)
+            elif mqtt_alive is False:
+                talk("sorry sir mqtt server is down")
 
         elif 'thank you' in query:
             talk('my pleasure sir')

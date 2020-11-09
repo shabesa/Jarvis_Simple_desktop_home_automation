@@ -7,7 +7,7 @@ Requirements:
 2. Speech Recognition
         pip install SpeechRecognition
 3. Mqtt
-	    pip install paho-mqtt
+	pip install paho-mqtt
 4. Wikipedia
         pip install wikipedia
 5. VLC media control
