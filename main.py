@@ -100,24 +100,25 @@ def byebye():
     talk('see you later sir')
 
 
-def mqtt_ping():
+def mqtt_ping(ping):
     talk("checking mqtt server")
     try:
         publish.single("ping", payload="mqtt", hostname=host)
         test = subscribe.simple("pingOut", hostname=host)
-        print('%s' % (test.payload))
+        print('%s' % (test.payload.decode('ascii')))
         if test.payload.decode('ascii') == "mqtt":
             talk("mqtt server up and running")
-            mqtt_alive = True
+            ping = True
     except Exception as e:
         print(e)
         talk("sir mqtt server is not responding")
-        mqtt_alive = False
+        ping = False
+    return ping
 
 
-def systemCheck():
-    if mqtt_alive is True:
-        talk("sir i am initiating systems check")
+def systemCheck(start):
+    talk("sir i am initiating systems check")
+    if start is True:
         publish.single("check", payload="check", hostname=host)
         system1 = subscribe.simple("status", hostname=host)
         print('%s' % (system1.payload.decode('ascii')))
@@ -125,8 +126,8 @@ def systemCheck():
             talk("sir board 1 is online")
         else:
             talk("sir the systems are offline")
-    elif mqtt_alive is False:
-        talk("system check failed as the mqtt server is down")
+    else:
+        talk("systems check failed as the mqtt server is down")
 
 
 def room_temp():
@@ -136,13 +137,16 @@ def room_temp():
         temperature = subscribe.simple("tdata", hostname=host)
         print("%s" % (temperature.payload.decode('ascii')))
         talk(temperature.payload.decode('ascii') + "degree celcius")
+    else:
+        talk("mqtt failure sir, cannot fetch the data")
 
 
 if __name__ == "__main__":
     talk('Hi I am Jarvis. Your personal assistant')
     welcome()
-    mqtt_ping()
-    systemCheck()
+    mqtt_alive = mqtt_ping(mqtt_alive)
+    systemCheck(mqtt_alive)
+    talk("sir start up check is complete")
     while True:
         query = inputVC().lower()
 
@@ -263,6 +267,9 @@ if __name__ == "__main__":
         elif 'jarvis' in query:
             talk('At your service sir')
 
+        elif 'what are you doing' in query:
+            talk('waiting for your command sir')
+
         elif 'initiate systems check' in query:
             systemCheck()
 
@@ -292,8 +299,18 @@ if __name__ == "__main__":
             elif mqtt_alive is False:
                 talk("sorry sir mqtt server is down")
 
+        elif 'ok' in query:
+            talk("fine sir")
+
         elif 'thank you' in query:
             talk('my pleasure sir')
+
+        elif 'restart' in query:
+            talk("sir are you sure to restart?")
+            result = inputVC()
+            if result == "yes":
+                os.system('python "add your code directory"')
+                break
 
         elif 'bye bye' in query:
             byebye()
