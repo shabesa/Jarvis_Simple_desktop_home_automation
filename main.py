@@ -25,7 +25,7 @@ music_dir = 'add your music directory'
 media_player = vlc.MediaPlayer()
 
 # mqtt host
-host = "enter your host"
+host = "enter your ip address"
 mqtt_alive = False
 
 # init the text to speech engine
@@ -271,7 +271,7 @@ if __name__ == "__main__":
             talk('waiting for your command sir')
 
         elif 'initiate systems check' in query:
-            systemCheck()
+            systemCheck(mqtt_alive)
 
         elif 'turn on lights' in query:
             if mqtt_alive is True:

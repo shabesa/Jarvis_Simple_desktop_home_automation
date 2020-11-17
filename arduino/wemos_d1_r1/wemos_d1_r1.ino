@@ -3,9 +3,9 @@
 
 // Update these with values suitable for your network.
 
-const char* ssid = "TP link";
-const char* password = "arkoshakis";
-const char* mqtt_server = "192.168.0.103";
+const char* ssid = "";
+const char* password = "";
+const char* mqtt_server = "";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -80,7 +80,7 @@ void reconnect() {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       client.publish("status", "board 1 online");
-      client.subscribe("lightsIn");
+      client.subscribe("lightsOut");
       client.subscribe("check");
       client.subscribe("temp");
     } else {
