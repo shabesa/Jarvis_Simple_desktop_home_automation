@@ -17,7 +17,7 @@ songIsPlaying = False
 videoIsPlaying = False
 
 # adding media directories
-# example_dir = 'C:\\Users\\DELL\\Desktop\\'
+# example_dir = 'C:\\Users\\%user name%\\Desktop\\'
 movie_dir = 'add your movie directory'
 music_dir = 'add your music directory'
 
