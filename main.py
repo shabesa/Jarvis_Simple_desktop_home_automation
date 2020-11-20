@@ -76,7 +76,7 @@ def inputVC():
     return query
 
 
-# function to start server to send mail
+# function to start the server to send mail
 def sendEmail(to, content):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.ehlo()
@@ -86,7 +86,7 @@ def sendEmail(to, content):
     server.close()
 
 
-# function to stop the function
+# function to stop the code
 def byebye():
     hour = int(datetime.datetime.now().hour)
     if hour >= 0 and hour < 12:
@@ -100,6 +100,7 @@ def byebye():
     talk('see you later sir')
 
 
+# functions to  check the status of mqtt server
 def mqtt_ping(ping):
     talk("checking mqtt server")
     try:
