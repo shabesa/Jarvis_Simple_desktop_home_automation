@@ -11,6 +11,10 @@ import wikipedia
 import webbrowser
 from time import sleep
 import vlc
+from recog import facePass
+
+faceis = False
+userPin = [1, 2, 3]
 
 # setting the state for media
 songIsPlaying = False
@@ -144,175 +148,187 @@ def room_temp():
 
 if __name__ == "__main__":
     talk('Hi I am Jarvis. Your personal assistant')
-    welcome()
-    mqtt_alive = mqtt_ping(mqtt_alive)
-    systemCheck(mqtt_alive)
-    talk("sir start up check is complete")
-    while True:
-        query = inputVC().lower()
-
-        if 'play music' in query:
-            songs = list(os.listdir(music_dir))
-            n = 0
-            for i in songs:
-                print(n, '.', i)
-                n += 1
-            sleep(5)
-            talk('sir song number please')
-            songVal = inputVC()
-            stoplay = os.path.join(music_dir, songs[int(songVal)])
-            sMedia = vlc.Media(stoplay)
-            media_player.set_media(sMedia)
-            media_player.play()
-            songIsPlaying = True
-
-        elif 'what is the song volume' in query:
-            if songIsPlaying is True:
-                csv = media_player.audio_get_volume()
-                print(csv)
-                talk(f"sir the volume is {csv} percent")
-            else:
-                talk('sir there is no media playing')
-
-        elif 'set song volume' in query:
-            if songIsPlaying is True:
-                talk('sir what is the volume level that you want?')
-                svVal = inputVC()
-                media_player.audio_set_volume(int(svVal))
-                talk(f'sir volume is set to {svVal} percent')
-            else:
-                talk('sir there is no media playing currently')
-
-        elif 'hold song point' in query:
-            media_player.pause()
-            talk('song paused')
-            songIsPlaying = False
-
-        elif 'continue song' in query:
-            media_player.play()
-
-        elif 'stop song' in query:
-            media_player.stop()
-            songIsPlaying = False
-
-        elif 'play video' in query:
-            movies = os.listdir(movie_dir)
-            print(movies)
-            sleep(5)
-            talk('sir video number please')
-            movieVal = inputVC()
-            mtoPlay = os.path.join(movie_dir, movies[int(movieVal)])
-            mMedia = vlc.Media(mtoPlay)
-            media_player.set_media(mMedia)
-            media_player.play()
-            videoIsPlaying = True
-
-        elif 'what is the video volume' in query:
-            if videoIsPlaying is True:
-                cmv = media_player.audio_get_volume()
-                print(cmv)
-                talk(f"sir the volume is{cmv} percent")
-            else:
-                talk('sir there is no media playing')
-
-        elif 'set video volume' in query:
-            if videoIsPlaying is True:
-                talk('sir what is the volume level that you want?')
-                mvVal = inputVC()
-                media_player.audio_set_volume(int(mvVal))
-                talk(f'sir volume is set to {mvVal} percent')
-            else:
-                talk('sir there is no video playing currently')
-
-        elif 'hold scene' in query:
-            media_player.pause()
-            talk('video paused')
-            videoIsPlaying = False
-
-        elif 'continue video' in query:
-            media_player.play()
-
-        elif 'stop video' in query:
-            media_player.stop()
-            videoIsPlaying = False
-
-        elif 'wait' in query:
-            talk('sir duration')
-            waitVal = inputVC()
-            if waitVal == 'media time' or waitVal == 'time':
-                dur = media_player.get_length()
-                print((dur / 1000) / 60)
-                sleep(dur / 1000)
-            else:
-                sleep(int(waitVal))
-
-        elif 'send a mail' in query:
-            try:
-                talk("What should I say?")
-                content = inputVC()
-                talk("sir please enter the mail id")
-                to = input('mail id: ')
-                sendEmail(to, content)
-                talk("Email has been sent!")
-            except Exception as e:
-                print(e)
-                talk("Sorry sir. I am not able to send this email")
-
-        elif 'what is the time' in query:
-            strTime = datetime.datetime.now().strftime("%H:%M:%S")
-            talk(f"Sir, the time is {strTime}")
-
-        elif 'what is the room temperature' in query:
-            room_temp()
-
-        elif 'jarvis' in query:
-            talk('At your service sir')
-
-        elif 'what are you doing' in query:
-            talk('waiting for your command sir')
-
-        elif 'initiate systems check' in query:
+    talk('scanning face for authorization')
+    faceis = facePass(faceis)
+    if faceis == "Shabesa":
+        talk("face verified")
+        talk("sir enter your pin for second step authorization")
+        pin = int(input('enter your pin: '))
+        if pin in userPin:
+            talk("Authorization complete. booting system")
+            welcome()
+            mqtt_alive = mqtt_ping(mqtt_alive)
             systemCheck(mqtt_alive)
+            talk("sir start up check is complete")
+            while True:
+                query = inputVC().lower()
 
-        elif 'turn on lights' in query:
-            if mqtt_alive is True:
-                talk('Sir which room?')
-                room = inputVC()
-                if room == 'master bedroom':
-                    talk(f'turning on lights in {room}')
-                    publish.single("lightsOut", payload="mblon", hostname=host)
-                elif room == 'server room':
-                    talk(f'turning on lights in {room}')
-                    publish.single("lightsOut", payload="srlon", hostname=host)
-            elif mqtt_alive is False:
-                talk("sorry sir mqtt server is down")
+                if 'play music' in query:
+                    songs = list(os.listdir(music_dir))
+                    n = 0
+                    for i in songs:
+                        print(n, '.', i)
+                        n += 1
+                    sleep(5)
+                    talk('sir song number please')
+                    songVal = inputVC()
+                    stoplay = os.path.join(music_dir, songs[int(songVal)])
+                    sMedia = vlc.Media(stoplay)
+                    media_player.set_media(sMedia)
+                    media_player.play()
+                    songIsPlaying = True
 
-        elif 'turn off lights' in query:
-            if mqtt_alive is True:
-                talk('Sir which room?')
-                room = inputVC()
-                if room == 'master bedroom':
-                    talk(f'turning off lights in {room}')
-                    publish.single("lightsOut", payload="mblof", hostname=host)
-                elif room == 'server room':
-                    talk(f'turning off lights in {room}')
-                    publish.single("lightsOut", payload="srlof", hostname=host)
-            elif mqtt_alive is False:
-                talk("sorry sir mqtt server is down")
+                elif 'what is the song volume' in query:
+                    if songIsPlaying is True:
+                        csv = media_player.audio_get_volume()
+                        print(csv)
+                        talk(f"sir the volume is {csv} percent")
+                    else:
+                        talk('sir there is no media playing')
 
-        elif 'ok' in query:
-            talk("fine sir")
+                elif 'set song volume' in query:
+                    if songIsPlaying is True:
+                        talk('sir what is the volume level that you want?')
+                        svVal = inputVC()
+                        media_player.audio_set_volume(int(svVal))
+                        talk(f'sir volume is set to {svVal} percent')
+                    else:
+                        talk('sir there is no media playing currently')
 
-        elif 'thank you' in query:
-            talk('my pleasure sir')
+                elif 'hold song point' in query:
+                    media_player.pause()
+                    talk('song paused')
+                    songIsPlaying = False
 
-        elif 'restart' in query:
-            talk("sir are you sure to restart?")
-            result = inputVC()
-            if result == "yes":
-                os.system('python "add your code directory"')
-                break
+                elif 'continue song' in query:
+                    media_player.play()
 
-        elif 'bye bye' in query:
-            byebye()
-            break
+                elif 'stop song' in query:
+                    media_player.stop()
+                    songIsPlaying = False
+
+                elif 'play video' in query:
+                    movies = os.listdir(movie_dir)
+                    print(movies)
+                    sleep(5)
+                    talk('sir video number please')
+                    movieVal = inputVC()
+                    mtoPlay = os.path.join(movie_dir, movies[int(movieVal)])
+                    mMedia = vlc.Media(mtoPlay)
+                    media_player.set_media(mMedia)
+                    media_player.play()
+                    videoIsPlaying = True
+
+                elif 'what is the video volume' in query:
+                    if videoIsPlaying is True:
+                        cmv = media_player.audio_get_volume()
+                        print(cmv)
+                        talk(f"sir the volume is{cmv} percent")
+                    else:
+                        talk('sir there is no media playing')
+
+                elif 'set video volume' in query:
+                    if videoIsPlaying is True:
+                        talk('sir what is the volume level that you want?')
+                        mvVal = inputVC()
+                        media_player.audio_set_volume(int(mvVal))
+                        talk(f'sir volume is set to {mvVal} percent')
+                    else:
+                        talk('sir there is no video playing currently')
+
+                elif 'hold scene' in query:
+                    media_player.pause()
+                    talk('video paused')
+                    videoIsPlaying = False
+
+                elif 'continue video' in query:
+                    media_player.play()
+
+                elif 'stop video' in query:
+                    media_player.stop()
+                    videoIsPlaying = False
+
+                elif 'wait' in query:
+                    talk('sir duration')
+                    waitVal = inputVC()
+                    if waitVal == 'media time' or waitVal == 'time':
+                        dur = media_player.get_length()
+                        print((dur / 1000) / 60)
+                        sleep(dur / 1000)
+                    else:
+                        sleep(int(waitVal))
+
+                elif 'send a mail' in query:
+                    try:
+                        talk("What should I say?")
+                        content = inputVC()
+                        talk("sir please enter the mail id")
+                        to = input('mail id: ')
+                        sendEmail(to, content)
+                        talk("Email has been sent!")
+                    except Exception as e:
+                        print(e)
+                        talk("Sorry sir. I am not able to send this email")
+
+                elif 'what is the time' in query:
+                    strTime = datetime.datetime.now().strftime("%H:%M:%S")
+                    talk(f"Sir, the time is {strTime}")
+
+                elif 'what is the room temperature' in query:
+                    room_temp()
+
+                elif 'jarvis' in query:
+                    talk('At your service sir')
+
+                elif 'what are you doing' in query:
+                    talk('waiting for your command sir')
+
+                elif 'initiate systems check' in query:
+                    systemCheck(mqtt_alive)
+
+                elif 'turn on lights' in query:
+                    if mqtt_alive is True:
+                        talk('Sir which room?')
+                        room = inputVC()
+                        if room == 'master bedroom':
+                            talk(f'turning on lights in {room}')
+                            publish.single("lightsOut", payload="mblon", hostname=host)
+                        elif room == 'server room':
+                            talk(f'turning on lights in {room}')
+                            publish.single("lightsOut", payload="srlon", hostname=host)
+                    elif mqtt_alive is False:
+                        talk("sorry sir mqtt server is down")
+
+                elif 'turn off lights' in query:
+                    if mqtt_alive is True:
+                        talk('Sir which room?')
+                        room = inputVC()
+                        if room == 'master bedroom':
+                            talk(f'turning off lights in {room}')
+                            publish.single("lightsOut", payload="mblof", hostname=host)
+                        elif room == 'server room':
+                            talk(f'turning off lights in {room}')
+                            publish.single("lightsOut", payload="srlof", hostname=host)
+                    elif mqtt_alive is False:
+                        talk("sorry sir mqtt server is down")
+
+                elif 'ok' in query:
+                    talk("fine sir")
+
+                elif 'thank you' in query:
+                    talk('my pleasure sir')
+
+                elif 'restart' in query:
+                    talk("sir are you sure to restart?")
+                    result = inputVC()
+                    if result == "yes":
+                        os.system('python "add your code directory"')
+                        break
+
+                elif 'bye bye' in query:
+                    byebye()
+                    break
+    elif faceis == "Unknown":
+        talk("I don't know you")
+        talk("I am shut-ing down")
+
