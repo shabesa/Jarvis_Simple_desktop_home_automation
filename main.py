@@ -14,7 +14,9 @@ import vlc
 from recog import facePass
 
 faceis = False
-userPin = [1, 2, 3]
+userPin = {1:"my boss"}
+
+canDo = {1:"play music", 2:"play movies", 3:"control your media", 4:"control your home", 5:"and many more"}
 
 # setting the state for media
 songIsPlaying = False
@@ -40,7 +42,7 @@ engine.setProperty('voice', voices[0].id)
 # setting serial comms
 # board = serial.Serial(COM6, 9600)
 
-
+    
 # making to speak the text
 def talk(audio):
     engine.say(audio)
@@ -155,7 +157,7 @@ if __name__ == "__main__":
         talk("sir enter your pin for second step authorization")
         pin = int(input('enter your pin: '))
         if pin in userPin:
-            talk("Authorization complete. booting system")
+            talk(f"Authorization complete. You are {userPin[pin]}. booting system")
             welcome()
             mqtt_alive = mqtt_ping(mqtt_alive)
             systemCheck(mqtt_alive)
@@ -270,6 +272,9 @@ if __name__ == "__main__":
                         print(e)
                         talk("Sorry sir. I am not able to send this email")
 
+                elif 'open youtube' in query:
+                    webbrowser.open('www.youtube.com')
+
                 elif 'what is the time' in query:
                     strTime = datetime.datetime.now().strftime("%H:%M:%S")
                     talk(f"Sir, the time is {strTime}")
@@ -312,6 +317,11 @@ if __name__ == "__main__":
                     elif mqtt_alive is False:
                         talk("sorry sir mqtt server is down")
 
+                elif 'what can you do' in query:
+                    talk("i can do many things like")
+                    for i in canDo:
+                        talk(canDo[i])
+
                 elif 'ok' in query:
                     talk("fine sir")
 
@@ -322,7 +332,7 @@ if __name__ == "__main__":
                     talk("sir are you sure to restart?")
                     result = inputVC()
                     if result == "yes":
-                        os.system('python "add your code directory"')
+                        os.system('python "C:\\Users\\arun kohi\\Desktop\\shabesa\\Projects\\Shabesa\\Simple_desktop_and_home_automation\\main.py"')
                         break
 
                 elif 'bye bye' in query:
